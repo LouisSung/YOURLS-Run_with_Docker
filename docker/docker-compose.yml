@@ -1,0 +1,43 @@
+version: '3'
+services:
+  YOURLS:
+    image: yourls:1.7.4-fpm-alpine
+    container_name: YOURLS
+    depends_on:
+      - yourls-database
+    env_file:
+      - ./deploy/env-yourls.env
+    volumes:
+      - ./deploy/yourls/:/var/www/html
+    networks:
+      - intranet-yourls
+
+
+  yourls-database:
+    image: mysql:8.0.18
+    container_name: yourls-database
+    env_file:
+      - ./deploy/env-mysql.env
+    volumes:
+      - ./deploy/database/:/var/lib/mysql
+    networks:
+      - intranet-yourls
+
+
+  nginx:
+    image: nginx:1.17.5-alpine
+    container_name: yourls-nginx
+    depends_on:
+      - YOURLS
+    ports:
+      - '80:80'
+    volumes:
+      - ./deploy/yourls/:/var/www/html
+      - ./deploy/default.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - intranet-yourls
+
+
+networks:
+  intranet-yourls:
+

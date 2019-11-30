@@ -1,0 +1,35 @@
+version: '3'
+services:
+  YOURLS:
+    image: yourls:1.7.4-fpm-alpine
+    container_name: YOURLS
+    environment:
+      - INIT_INSTALL_RECOMMENDED_PLUGINS=false
+      - INIT_ENABLE_GITLAB_OAUTH_SUPPORT=false
+    volumes:
+      - ./deploy/yourls/:/yourls_init
+      - ./init/config-docker.php:/init/config.php
+      - ./init/recommended_plugins/:/init/plugins
+      - ./init/cmd-yourls.sh:/usr/local/bin/cmd-yourls.sh
+    command: cmd-yourls.sh
+    networks:
+      - intranet-init-yourls
+
+
+  yourls-database:
+    image: mysql:8.0.18
+    container_name: yourls-database
+    env_file:
+      - ./deploy/env-mysql.env
+    environment:
+      - POSTPONE_FOR_A_WHILE=60s
+    volumes:
+      - ./deploy/database/:/var/lib/mysql
+      - ./init/cmd-mysql.sh:/usr/local/bin/cmd-mysql.sh
+    command: cmd-mysql.sh
+    networks:
+      - intranet-init-yourls
+
+networks:
+  intranet-init-yourls:
+
